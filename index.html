@@ -7,26 +7,50 @@
 </head>
 <body>
     <h1>Force Browser No Sleep</h1>
-    <!-- <audio controls loop autoplay muted="true" id="audioPlayer"> -->
-    <audio controls muted="true" id="audioPlayer">
+    <audio controls loop muted="true" id="audioPlayer">
         <source src="a.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+    <p>Logs:</p>
 </body>
 </html>
 <script>
     const audioPlayer = document.getElementById('audioPlayer');
 
-    // Ensure the audio restarts if it unexpectedly stops
+    // Keep the phone's browser active with Wake Lock API
+    let wakeLock = null;
+    const requestWakeLock = async () => {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            document.querySelector("p").innerHTML += '<br/>Wake Lock is active';
+        } catch (err) {
+            document.querySelector("p").innerHTML += `<br/>Wake Lock failed: ${err.name}, ${err.message}`;
+        }
+    };
+
+    const releaseWakeLock = () => {
+        if (wakeLock) {
+            wakeLock.release();
+            wakeLock = null;
+            document.querySelector("p").innerHTML += '<br/>Wake Lock released';
+        }
+    };
+
+    // Ensure audio restarts if it stops unexpectedly
     audioPlayer.addEventListener('ended', () => {
         audioPlayer.play();
     });
 
-    // Keep the phone's browser active
+    // Re-trigger audio play periodically
     setInterval(() => {
-        // Interact with the audio element periodically
         if (audioPlayer.paused) {
             audioPlayer.play();
         }
-    }, 1000); // Every 1 second
+    }, 1000);
+
+    // Request Wake Lock on load
+    requestWakeLock();
+
+    // Release Wake Lock on unload
+    window.addEventListener('unload', releaseWakeLock);
 </script>
