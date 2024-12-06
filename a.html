@@ -7,9 +7,26 @@
 </head>
 <body>
     <h1>Simple Audio Player</h1>
-    <audio controls loop autoplay muted="true">
+    <!-- <audio controls loop autoplay muted="true" id="audioPlayer"> -->
+    <audio controls muted="true" id="audioPlayer">
         <source src="a.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 </body>
 </html>
+<script>
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    // Ensure the audio restarts if it unexpectedly stops
+    audioPlayer.addEventListener('ended', () => {
+        audioPlayer.play();
+    });
+
+    // Keep the phone's browser active
+    setInterval(() => {
+        // Interact with the audio element periodically
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+        }
+    }, 15000); // Every 15 seconds
+</script>
