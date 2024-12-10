@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Player with Wake Lock</title>
+    <title>Force Browser No Sleep</title>
 </head>
 <body>
-    <h1>Force Browser No Sleep</h1>
+    <h1>Force Browser No Sleep v1</h1>
     <audio controls loop id="audioPlayer">
         <source src="a.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -64,5 +64,30 @@
 
     // Release Wake Lock on unload
     window.addEventListener('unload', releaseWakeLock);
+
+    // Implement Media Session API for better interaction with mobile notifications
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Background Audio',
+            artist: 'Unknown',
+            album: 'Ambient Sounds',
+            artwork: [
+                { src: 'icon.png', sizes: '96x96', type: 'image/png' }, // Replace with your image
+                { src: 'icon@2x.png', sizes: '192x192', type: 'image/png' },
+            ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+            audioPlayer.play();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            audioPlayer.pause();
+        });
+
+        navigator.mediaSession.setActionHandler('stop', () => {
+            releaseWakeLock();
+        });
+    }
 </script>
 </html>
