@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Player</title>
+    <title>Audio Player with Wake Lock</title>
 </head>
 <body>
     <h1>Force Browser No Sleep</h1>
@@ -11,28 +11,36 @@
         <source src="a.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+    <button id="wakeLockButton">Activate Wake Lock</button>
     <p>Logs:</p>
 </body>
-</html>
 <script>
     const audioPlayer = document.getElementById('audioPlayer');
-
-    // Keep the phone's browser active with Wake Lock API
+    const wakeLockButton = document.getElementById('wakeLockButton');
     let wakeLock = null;
+
     const requestWakeLock = async () => {
         try {
-            wakeLock = await navigator.wakeLock.request('screen');
-            document.querySelector("p").innerHTML += '<br/>Wake Lock is active';
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                document.querySelector("p").innerHTML += '<br/>Wake Lock is active';
+                console.log('Wake Lock activated');
+            } else {
+                document.querySelector("p").innerHTML += '<br/>Wake Lock API not supported.';
+            }
         } catch (err) {
+            console.error('Wake Lock failed:', err);
             document.querySelector("p").innerHTML += `<br/>Wake Lock failed: ${err.name}, ${err.message}`;
         }
     };
 
     const releaseWakeLock = () => {
         if (wakeLock) {
-            wakeLock.release();
-            wakeLock = null;
-            document.querySelector("p").innerHTML += '<br/>Wake Lock released';
+            wakeLock.release().then(() => {
+                wakeLock = null;
+                document.querySelector("p").innerHTML += '<br/>Wake Lock released';
+                console.log('Wake Lock released');
+            });
         }
     };
 
@@ -48,9 +56,10 @@
         }
     }, 1000);
 
-    // Request Wake Lock on load
-    requestWakeLock();
+    // Activate Wake Lock on button click
+    wakeLockButton.addEventListener('click', requestWakeLock);
 
     // Release Wake Lock on unload
     window.addEventListener('unload', releaseWakeLock);
 </script>
+</html>
