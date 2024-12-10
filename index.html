@@ -19,6 +19,9 @@
     const wakeLockButton = document.getElementById('wakeLockButton');
     let wakeLock = null;
 
+    // Set audio volume to 1% of the maximum volume
+    audioPlayer.volume = 0.01;
+
     const requestWakeLock = async () => {
         try {
             if ('wakeLock' in navigator) {
