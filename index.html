@@ -8,7 +8,7 @@
 <body>
   <h1>Music Player</h1>
   <button id="playButton">Play Music</button>
-  <audio id="audio" loop>
+  <audio id="audio" controls loop>
     <source src="a.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
@@ -30,25 +30,21 @@
       });
     });
 
-    // Disable NoSleep when audio pauses or ends
-    audio.addEventListener('pause', () => {
-      noSleep.disable();
-      console.log('Audio paused, NoSleep disabled.');
-    });
-
-    audio.addEventListener('ended', () => {
-      noSleep.disable();
-      console.log('Audio ended, NoSleep disabled.');
-    });
-
-    // Update status every 5 seconds
+    // Update status every 1 second
     setInterval(() => {
       const now = new Date().toLocaleTimeString();
       const isPlaying = !audio.paused;
       const statusText = `Status: ${isPlaying ? 'Playing' : 'Paused'} (Last updated: ${now})`;
       statusDisplay.textContent = statusText;
       console.log(statusText);
-    }, 5000); // Every 5 seconds
+
+      // If audio is paused, play it
+      if (audio.paused) {
+        audio.play().catch(error => {
+          console.error('Playback failed:', error);
+        });
+      }
+    }, 1); // Every 1 second
   </script>
 </body>
 </html>
