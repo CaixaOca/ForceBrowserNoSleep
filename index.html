@@ -1,107 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Force Browser No Sleep</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
 </head>
 <body>
-    <h1>Force Browser No Sleep v2</h1>
-    <audio controls loop id="audioPlayer">
-        <source src="a.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-    <button id="wakeLockButton">Activate Wake Lock</button>
-    <p>Logs:</p>
+  <h1>Music Player</h1>
+  <button id="playButton">Play Music</button>
+  <audio id="audio" loop>
+    <source src="a.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
+  <script>
+    const audio = document.getElementById('audio');
+    const playButton = document.getElementById('playButton');
+    const noSleep = new NoSleep();
+
+    playButton.addEventListener('click', () => {
+      audio.play().then(() => {
+        noSleep.enable();
+        console.log('Audio playing with NoSleep enabled.');
+      }).catch(error => {
+        console.error('Playback failed:', error);
+      });
+    });
+
+    // Disable NoSleep when audio is paused or ends
+    audio.addEventListener('pause', () => {
+      noSleep.disable();
+      console.log('Audio paused, NoSleep disabled.');
+    });
+
+    audio.addEventListener('ended', () => {
+      noSleep.disable();
+      console.log('Audio ended, NoSleep disabled.');
+    });
+  </script>
 </body>
-<script>
-    const audioPlayer = document.getElementById('audioPlayer');
-    const wakeLockButton = document.getElementById('wakeLockButton');
-    let wakeLock = null;
-
-    // Set audio volume to 1% of the maximum volume
-    audioPlayer.volume = 0.01;
-
-    const requestWakeLock = async () => {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
-                document.querySelector("p").innerHTML += '<br/>Wake Lock is active';
-                console.log('Wake Lock activated');
-            } else {
-                document.querySelector("p").innerHTML += '<br/>Wake Lock API not supported.';
-            }
-        } catch (err) {
-            console.error('Wake Lock failed:', err);
-            document.querySelector("p").innerHTML += `<br/>Wake Lock failed: ${err.name}, ${err.message}`;
-        }
-    };
-
-    const releaseWakeLock = () => {
-        if (wakeLock) {
-            wakeLock.release().then(() => {
-                wakeLock = null;
-                document.querySelector("p").innerHTML += '<br/>Wake Lock released';
-                console.log('Wake Lock released');
-            });
-        }
-    };
-
-    // Ensure audio restarts if it stops unexpectedly
-    audioPlayer.addEventListener('ended', () => {
-        audioPlayer.play();
-    });
-
-    // Re-trigger audio play periodically
-    setInterval(() => {
-        if (audioPlayer.paused) {
-            audioPlayer.play();
-        }
-    }, 1000);
-
-    // Activate Wake Lock on button click
-    wakeLockButton.addEventListener('click', requestWakeLock);
-
-    // Release Wake Lock on unload
-    window.addEventListener('unload', releaseWakeLock);
-
-    // Implement Media Session API for better interaction with mobile notifications
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: 'Background Audio',
-            artist: 'Unknown',
-            album: 'Ambient Sounds',
-            artwork: [
-                
-            ]
-        });
-
-        navigator.mediaSession.setActionHandler('play', () => {
-            audioPlayer.play();
-        });
-
-        navigator.mediaSession.setActionHandler('pause', () => {
-            audioPlayer.pause();
-        });
-
-        navigator.mediaSession.setActionHandler('stop', () => {
-            releaseWakeLock();
-        });
-    }
-
-    // Alternative fallback to keep the page active
-    setInterval(() => {
-        document.body.style.visibility = document.body.style.visibility === 'hidden' ? 'visible' : 'hidden';
-        setTimeout(() => { document.body.style.visibility = 'visible'; }, 10);
-    }, 30000); // Trigger every 30 seconds to prevent background sleep
-
-    // Use the visibilitychange event to restart the audio
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-            }
-        }
-    });
-</script>
 </html>
