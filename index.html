@@ -12,12 +12,15 @@
     <source src="a.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
+  <p id="status">Status: Not playing</p>
   <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
   <script>
     const audio = document.getElementById('audio');
     const playButton = document.getElementById('playButton');
+    const statusDisplay = document.getElementById('status');
     const noSleep = new NoSleep();
 
+    // User starts playback
     playButton.addEventListener('click', () => {
       audio.play().then(() => {
         noSleep.enable();
@@ -27,7 +30,7 @@
       });
     });
 
-    // Disable NoSleep when audio is paused or ends
+    // Disable NoSleep when audio pauses or ends
     audio.addEventListener('pause', () => {
       noSleep.disable();
       console.log('Audio paused, NoSleep disabled.');
@@ -37,6 +40,15 @@
       noSleep.disable();
       console.log('Audio ended, NoSleep disabled.');
     });
+
+    // Update status every 5 seconds
+    setInterval(() => {
+      const now = new Date().toLocaleTimeString();
+      const isPlaying = !audio.paused;
+      const statusText = `Status: ${isPlaying ? 'Playing' : 'Paused'} (Last updated: ${now})`;
+      statusDisplay.textContent = statusText;
+      console.log(statusText);
+    }, 5000); // Every 5 seconds
   </script>
 </body>
 </html>
